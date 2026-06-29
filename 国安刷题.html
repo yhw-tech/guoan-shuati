@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>国家安全知识 · 智能刷题</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#c41e3a,#8b1528);color:#fff;padding:14px 16px;text-align:center}
+.header h1{font-size:17px;letter-spacing:1px}
+.header .sub{font-size:11px;opacity:.85;margin-top:2px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e0e0e5}
+.tab{flex:1;text-align:center;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:#666}
+.tab.active{color:#c41e3a;border-bottom-color:#c41e3a}
+.stats{display:flex;justify-content:space-around;padding:10px 14px;background:#fff;font-size:12px;border-bottom:1px solid #f0f0f0}
+.stat{text-align:center}
+.stat .num{font-size:20px;font-weight:700}
+.stat.acc .num{color:#c41e3a}
+.stat.done .num{color:#1565c0}
+.progress-wrap{padding:6px 14px;background:#fff}
+.progress{height:5px;background:#e0e0e5;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:#c41e3a;border-radius:3px;transition:width .3s}
+.container{max-width:600px;margin:0 auto;padding:10px 12px}
+.card{background:#fff;border-radius:12px;padding:16px 14px;margin-bottom:10px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.q-meta{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.q-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.q-tag.sin{background:#e3f2fd;color:#1565c0}
+.q-tag.mul{background:#fff3e0;color:#e65100}
+.q-num{font-size:11px;color:#888}
+.q-text{font-size:15px;line-height:1.7;margin-bottom:14px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:8px;padding:10px 12px;border:2px solid #e0e0e5;border-radius:8px;cursor:pointer;background:#fafafa;min-height:44px}
+.opt:active{background:#f0f0f5}
+.opt.sel{border-color:#c41e3a;background:#fff5f5}
+.opt.ok{border-color:#4caf50;background:#e8f5e9}
+.opt.bad{border-color:#f44336;background:#ffebee}
+.opt .let{width:26px;height:26px;border-radius:50%;background:#e8e8ed;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.opt.sel .let{background:#c41e3a;color:#fff}
+.opt.ok .let{background:#4caf50;color:#fff}
+.opt.bad .let{background:#f44336;color:#fff}
+.opt .txt{flex:1;font-size:14px;line-height:1.3}
+.opt .icn{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;padding:10px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px}
+.btn:active{opacity:.8}
+.btn-go{background:#c41e3a;color:#fff}
+.btn-out{background:#fff;color:#c41e3a;border:1.5px solid #c41e3a}
+.btn:disabled{opacity:.35}
+.res{margin-top:10px;padding:10px;border-radius:6px;font-size:13px;text-align:center;font-weight:600;display:none}
+.res.show{display:block}
+.res.ok{background:#e8f5e9;color:#2e7d32}
+.res.bad{background:#ffebee;color:#c62828}
+.wrong-item{background:#fff;border-left:3px solid #f44336;padding:10px 12px;margin-bottom:6px;border-radius:0 6px 6px 0;font-size:12px}
+.wrong-item .qt{font-weight:600;margin-bottom:3px;line-height:1.5}
+.wrong-item .ac{color:#4caf50;line-height:1.5}
+.empty{text-align:center;padding:30px 16px;color:#999;font-size:14px}
+.empty .emj{font-size:40px;margin-bottom:8px}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f5;font-size:13px}
+.sr select,.sr input{padding:5px 8px;border-radius:5px;border:1px solid #ccc;font-size:12px}
+.sr input{width:55px;text-align:center}
+.tgl{width:44px;height:24px;background:#ccc;border-radius:12px;position:relative;cursor:pointer}
+.tgl.on{background:#c41e3a}
+.tgl:after{content:'';width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:.2s}
+.tgl.on:after{left:22px}
+.sticky-bar{position:sticky;top:0;z-index:10}
+@media(max-width:400px){.header h1{font-size:16px}.q-text{font-size:14px}.opt{padding:8px 10px}.opt .txt{font-size:13px}}
+</style>
+</head>
+<body>
+
+<div class="sticky-bar">
+<div class="header"><h1>🛡️ 国家安全知识 · 智能刷题</h1><div class="sub">单选题 91 题 · 多选题 30 题 · 共 121 题</div></div>
+<div class="tabs">
+<div class="tab active" id="tabQuiz">📝 刷题</div>
+<div class="tab" id="tabReview">📋 错题 <span id="wcBadge" style="background:#f44336;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;display:none">0</span></div>
+<div class="tab" id="tabSettings">⚙️ 设置</div>
+</div>
+<div class="stats" id="statsBar">
+<div class="stat acc"><div class="num" id="acc">0%</div><div>正确率</div></div>
+<div class="stat done"><div class="num" id="done">0</div><div>已答</div></div>
+<div class="stat remain"><div class="num" id="remain">121</div><div>剩余</div></div>
+</div>
+<div class="progress-wrap"><div class="progress"><div class="progress-fill" id="prog" style="width:0%"></div></div></div>
+</div>
+
+<div id="pageQuiz">
+<div class="container">
+<div class="card" id="qCard">
+<div class="q-meta"><span class="q-tag sin" id="qTag">单选题</span><span class="q-num" id="qNum"></span></div>
+<div class="q-text" id="qText"></div>
+<div class="options" id="opts"></div>
+<div class="res" id="resBanner"></div>
+<div class="btns" id="btnRow">
+<button class="btn btn-out" id="btnSkip">⏭ 跳过</button>
+<button class="btn btn-go" id="btnSubmit">✓ 提交答案</button>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<button class="btn btn-out" id="btnShow" style="flex:1">👁 显示答案</button>
+<button class="btn btn-go" id="btnNext" style="flex:2">下一题 →</button>
+</div>
+</div>
+</div>
+
+<div id="pageReview" style="display:none">
+<div class="container">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+<h3 style="font-size:15px">📋 错题本</h3>
+<button class="btn btn-out" style="flex:0 0 auto;padding:5px 12px;font-size:11px" id="btnClearWrong">清空错题</button>
+</div>
+<div id="wrongList"><div class="empty"><div class="emj">🎉</div>暂无错题，继续加油！</div></div>
+</div>
+</div>
+
+<div id="pageSettings" style="display:none">
+<div class="container">
+<div class="card">
+<div class="sr"><span>🗂 选题范围</span>
+<select id="setRange" style="min-width:120px">
+<option value="all">全部题目 (121题)</option>
+<option value="single">仅单选题 (91题)</option>
+<option value="multi">仅多选题 (30题)</option>
+<option value="wrong">仅错题</option>
+</select></div>
+<div class="sr"><span>🔀 随机出题</span><div class="tgl on" id="tglRandom"></div></div>
+<div class="sr"><span>✅ 答对自动移除</span><div class="tgl on" id="tglRemove"></div></div>
+<div class="sr"><span>🔢 每轮题数 (0=不限)</span><input type="number" id="setLimit" value="0" min="0" max="121"></div>
+</div>
+<div class="card">
+<h4 style="margin-bottom:8px;font-size:14px">📊 统计</h4>
+<div style="font-size:12px;line-height:2">
+<div>✅ 正确：<b id="stOk">0</b> 题</div>
+<div>❌ 错误：<b id="stBad">0</b> 题</div>
+<div>⏭ 跳过：<b id="stSkip">0</b> 题</div>
+<div>📊 正确率：<b id="stRate">0%</b></div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ========== DATA ==========
+var Q = [
+  {id:1,t:"single",q:"每年的全民国家安全教育日是（ ）",o:{A:"4月15日",B:"9月18日",C:"12月4日",D:"4月16日"},a:"A"},
+  {id:2,t:"single",q:"党的（ ）将“坚持总体国家安全观，坚决维护国家主权、安全、发展利益”载入党章。",o:{A:"十八大",B:"十九大",C:"二十大",D:"二十届四中全会"},a:"B"},
+  {id:3,t:"single",q:"贯彻总体国家安全观，坚持政治安全、人民安全、国家利益至上有机统一，要坚持以（ ）为宗旨。",o:{A:"政治安全",B:"人民安全",C:"经济安全",D:"军事安全"},a:"B"},
+  {id:4,t:"single",q:"贯彻总体国家安全观，坚持政治安全、人民安全、国家利益至上有机统一，要坚持以（ ）为根本。",o:{A:"政治安全",B:"国土安全",C:"文化安全",D:"军事安全"},a:"A"},
+  {id:5,t:"single",q:"维护国家主权、统一和领土完整是（ ）的共同义务。",o:{A:"全体中国公民",B:"国家工作人员",C:"武装力量",D:"人民警察"},a:"A"},
+  {id:6,t:"single",q:"党的二十大报告指出，必须坚定不移贯彻（ ），把维护国家安全贯穿党和国家工作各方面全过程，确保国家安全和社会稳定。",o:{A:"国家安全观",B:"总体安全观",C:"国家安全总体观",D:"总体国家安全观"},a:"D"},
+  {id:7,t:"single",q:"党的二十大报告指出，国家安全是（ ）的根基，社会稳定是国家强盛的前提。",o:{A:"民族复兴",B:"民族振兴",C:"国家统一",D:"领土完整"},a:"A"},
+  {id:8,t:"single",q:"个别西方国家对中国挑动“台独”“港独”“藏独”等分裂势力，妄图分裂中国，体现出我国（ ）和（ ）利益面临严峻外部挑战。",o:{A:"发展和安全",B:"传统和非传统",C:"国内和国际",D:"政治和经济"},a:"D"},
+  {id:9,t:"single",q:"坚持总体国家安全观，要始终把（ ）放在首要位置。",o:{A:"人民安全",B:"政治安全",C:"经济安全",D:"军事安全"},a:"B"},
+  {id:10,t:"single",q:"坚持（ ）对国家安全工作的集中统一领导，加强统筹协调。",o:{A:"国防部",B:"全国人民代表大会",C:"党中央",D:"中央军事委员会"},a:"C"},
+  {id:11,t:"single",q:"《国家安全法》第4条规定：坚持中国共产党对国家安全工作的领导，建立（ ）的国家安全领导体制。",o:{A:"分散自主、协同配合",B:"集中统一、高效权威",C:"政府主导、社会参与",D:"中央统筹、地方负责"},a:"B"},
+  {id:12,t:"single",q:"2014年1月，十八届中央政治局召开会议，研究决定（ ）设置，是党中央关于国家安全工作的决策和议事协调机构。",o:{A:"中央政法委员会",B:"中央国家安全委员会",C:"国防部",D:"应急管理部"},a:"B"},
+  {id:13,t:"single",q:"中国特色国家安全道路以（ ）为宗旨，坚持以人民为中心，国家安全一切为了人民、一切依靠人民。",o:{A:"政治安全",B:"人民安全",C:"经济安全",D:"国际安全"},a:"B"},
+  {id:14,t:"single",q:"中国特色国家安全道路以（ ）为根本，坚持党的领导和中国特色社会主义制度不动摇。",o:{A:"人民安全",B:"政治安全",C:"军事安全",D:"文化安全"},a:"B"},
+  {id:15,t:"single",q:"中国特色国家安全道路以（ ）为基础，确保国家经济发展不受侵害。",o:{A:"政治安全",B:"经济安全",C:"科技安全",D:"生态安全"},a:"B"},
+  {id:16,t:"single",q:"中国特色国家安全道路以（ ）为保障，为维护国家安全提供硬实力和软实力保障。",o:{A:"军事、科技、文化、社会安全",B:"粮食安全、能源安全",C:"网络安全、数据安全",D:"生物安全、核安全"},a:"A"},
+  {id:17,t:"single",q:"党的二十大报告提出的以（ ）保障新发展格局重大部署的战略要求。",o:{A:"新安全格局",B:"经济高质量发展",C:"全面依法治国",D:"社会和谐稳定"},a:"A"},
+  {id:18,t:"single",q:"在国家安全法治体系中，2015年7月公布施行的（ ）是一部统领性、综合性、基础性的国家安全法律。",o:{A:"《反间谍法》",B:"《国家安全法》",C:"《网络安全法》",D:"《国防法》"},a:"B"},
+  {id:19,t:"single",q:"中国特色社会主义最本质的特征和最大优势是（ ）。",o:{A:"人民当家作主",B:"中国共产党领导",C:"依法治国",D:"共同富裕"},a:"B"},
+  {id:20,t:"single",q:"民族复兴伟业处于船到中流浪更急、人到半山路更陡的时候，必须进行（ ）。",o:{A:"伟大斗争",B:"单方面妥协",C:"被动防御",D:"完全依赖国际合作"},a:"A"},
+  {id:21,t:"single",q:"下列哪项不属于统筹发展和安全的重大意义？（ ）",o:{A:"新时代维护和塑造国家安全的必然要求",B:"维护改革发展稳定大局的重大原则",C:"推动我国经济高质量发展的有力保障",D:"实现个人利益最大化的重要途径"},a:"D"},
+  {id:22,t:"single",q:"统筹发展和安全的科学内涵中，发展对安全的作用是（ ）。",o:{A:"发展是安全的条件和保障",B:"发展是安全的基础和目的",C:"发展与安全相互独立，无直接关联",D:"发展会阻碍安全的实现"},a:"B"},
+  {id:23,t:"single",q:"统筹发展和安全在总体国家安全观的“五个统筹”中具有什么地位？（ ）",o:{A:"辅助性、补充性地位",B:"基础性、决定性地位",C:"次要性、从属性地位",D:"阶段性、过渡性地位"},a:"B"},
+  {id:24,t:"single",q:"从外部环境来看，我国统筹发展和安全面临的挑战是（ ）。",o:{A:"我国社会主义现代化建设取得历史性成就",B:"世界进入新的动荡变革期",C:"国内经济循环面临不少堵点",D:"重点领域风险仍需加强防范"},a:"B"},
+  {id:25,t:"single",q:"当前我国经济发展面临的复杂外部环境挑战不包括（ ）。",o:{A:"世界经济复苏进程异常艰难",B:"全球流动性风险不断增多",C:"全球产业分工格局深刻调整",D:"国际贸易繁荣发展"},a:"D"},
+  {id:26,t:"single",q:"推动创新、协调、绿色、开放、共享发展的前提都是（ ）。",o:{A:"经济持续增长",B:"国家安全、社会稳定",C:"科技自立自强",D:"人民安居乐业"},a:"B"},
+  {id:27,t:"single",q:"新时代维护和塑造国家安全、有效防范化解各类风险挑战的必然要求是（ ）。",o:{A:"更好统筹发展和安全",B:"全面扩大对外开放",C:"加快发展新质生产力",D:"推进区域协调发展"},a:"A"},
+  {id:28,t:"single",q:"我国现代化是“并联式”过程，因此必须（ ）。",o:{A:"坚持发展和安全并重",B:"坚持以发展优先兼顾安全",C:"坚持以安全优先控制发展",D:"坚持先发展后解决安全问题"},a:"A"},
+  {id:29,t:"single",q:"能够为前瞻性思考、全局性谋划提供科学思想方法的是（ ）。",o:{A:"系统观念",B:"底线思维",C:"极限思维",D:"创新思维"},a:"A"},
+  {id:30,t:"single",q:"比喻小概率、难预测、影响巨大、通常会引发连锁负面反应的突发事件是（ ）。",o:{A:"“灰犀牛”风险",B:"“黑天鹅”事件",C:"“蝴蝶效应”事件",D:"“破窗效应”风险"},a:"B"},
+  {id:31,t:"single",q:"国家安全涉及方方面面，其中最核心、最重要的就是（ ）。",o:{A:"政治安全",B:"经济安全",C:"人民安全",D:"军事安全"},a:"A"},
+  {id:32,t:"single",q:"（ ）是人民幸福生活的基础，在全面建设社会主义现代化国家进程中居于优先发展的战略位置。",o:{A:"人民健康",B:"社会稳定",C:"经济发展",D:"科技进步"},a:"A"},
+  {id:33,t:"single",q:"维护人民安全首要的是保护人民群众的（ ）安全。",o:{A:"人身",B:"生命",C:"财产",D:"信息"},a:"B"},
+  {id:34,t:"single",q:"保护（ ），是法治的根本目的。",o:{A:"人民幸福",B:"人民生命",C:"人民权益",D:"人民平等"},a:"C"},
+  {id:35,t:"single",q:"坚持以（ ）为中心的创作导向，推出更多增强人民精神力量的优秀作品。",o:{A:"市场",B:"政府",C:"人民",D:"经济"},a:"C"},
+  {id:36,t:"single",q:"人民健康既是民生问题，也是社会（ ）问题。",o:{A:"发展",B:"政治",C:"安全",D:"基础"},a:"C"},
+  {id:37,t:"single",q:"进入新时代以来，我国（ ）逐步健全，医疗卫生服务的公平性、可及性不断提升。",o:{A:"医疗卫生体系",B:"军事安全体系",C:"社会稳定体系",D:"公共服务体系"},a:"A"},
+  {id:38,t:"single",q:"（ ）至上是作出正确抉择的根本前提。",o:{A:"安全",B:"人民",C:"国家",D:"法律"},a:"B"},
+  {id:39,t:"single",q:"尊重和保障（ ）是中国共产党人的不懈追求。",o:{A:"人权",B:"经济",C:"政治",D:"军事"},a:"A"},
+  {id:40,t:"single",q:"（ ）是人民生活的安全网和社会运行的稳定器。",o:{A:"医疗卫生体系",B:"军事安全体系",C:"公共服务体系",D:"社会保障体系"},a:"D"},
+  {id:41,t:"single",q:"（ ）是国家安全的根本，决定着其他领域和其他方面的国家安全。",o:{A:"政治安全",B:"经济安全",C:"文化安全",D:"军事安全"},a:"A"},
+  {id:42,t:"single",q:"维护人民民主专政的国家政权安全是（ ），维护中国特色社会主义制度安全是（ ），维护社会主义意识形态安全是（ ）。",o:{A:"基础；关键；根本",B:"根本；基础；关键",C:"关键；基础；根本",D:"根本；关键；基础"},a:"D"},
+  {id:43,t:"single",q:"人民民主专政的科学内涵是指（ ）。",o:{A:"工人阶级领导的，以工农联盟为基础的，对人民实行民主和对敌人实行专政的国家制度",B:"资产阶级领导的",C:"各阶级联合执政",D:"农民阶级领导的"},a:"A"},
+  {id:44,t:"single",q:"（ ）是社会主义的生命，是全面建设社会主义现代化国家的应有之义。",o:{A:"依法治国",B:"改革开放",C:"人民民主",D:"科技创新"},a:"C"},
+  {id:45,t:"single",q:"（ ）是社会主义民主政治的本质属性，是最广泛、最真实、最管用的民主。",o:{A:"依法治国",B:"人民当家作主",C:"党的领导",D:"全过程人民民主"},a:"D"},
+  {id:46,t:"single",q:"维护中国特色社会主义制度安全的主要动力是（ ）。",o:{A:"全面依法治国",B:"全面从严治党",C:"全面深化改革",D:"全面建设社会主义现代化国家"},a:"C"},
+  {id:47,t:"single",q:"维护社会主义意识形态安全的根本在于（ ）。",o:{A:"健全意识形态工作责任制",B:"坚持马克思主义信仰和共产主义理想信念",C:"发展社会主义先进文化",D:"弘扬中华优秀传统文化"},a:"B"},
+  {id:48,t:"single",q:"关于教育领域维护意识形态安全，下列说法不正确的是（ ）。",o:{A:"抓好课堂教学主渠道建设",B:"加强师德师风建设",C:"淡化学校思想政治工作",D:"落实意识形态工作责任制"},a:"C"},
+  {id:49,t:"single",q:"要不断夯实维护国家政治安全的坚实思想基础，必须做到（ ）。",o:{A:"吸收借鉴西方“普世价值”",B:"坚定对马克思主义的理想信念",C:"放任两种意识形态自由竞争",D:"弱化对党员干部的思想引导"},a:"B"},
+  {id:50,t:"single",q:"解决大党独有难题必然是一个长期而艰巨的过程，这就决定了（ ）。",o:{A:"全面依法治国永远在路上",B:"全面从严治党永远在路上，党的自我革命永远在路上",C:"全面深化改革永远在路上",D:"全面建设社会主义现代化国家永远在路上"},a:"B"},
+  {id:51,t:"single",q:"全党务必不忘初心、牢记使命，务必谦虚谨慎、艰苦奋斗，务必（ ）。",o:{A:"敢于斗争、善于斗争",B:"勇于创新、善于创造",C:"勇于担当、善于作为",D:"敢于实践、善于总结"},a:"A"},
+  {id:52,t:"single",q:"（ ）是我们立党立国、兴党兴国的根本指导思想。",o:{A:"中国特色社会主义理论体系",B:"马克思主义",C:"习近平新时代中国特色社会主义思想",D:"科学发展观"},a:"B"},
+  {id:53,t:"single",q:"只有坚持（ ）在意识形态领域的指导地位，才能科学处理意识形态工作同经济建设等之间的关系。",o:{A:"中华优秀传统文化",B:"社会主义核心价值观",C:"马克思主义",D:"中国特色社会主义文化"},a:"C"},
+  {id:54,t:"single",q:"（ ）是马克思主义的根本观点，是中国共产党人认识世界、改造世界的根本要求。",o:{A:"群众路线",B:"实事求是",C:"独立自主",D:"与时俱进"},a:"B"},
+  {id:55,t:"single",q:"运用马克思主义世界观和方法论，首要的是把握好（ ）的世界观和方法论。",o:{A:"邓小平理论",B:"毛泽东思想",C:"习近平新时代中国特色社会主义思想",D:"科学社会主义"},a:"C"},
+  {id:56,t:"single",q:"全面认识坚持以（ ）为基础的科学内涵，是维护我国经济安全的重要前提和条件。",o:{A:"粮食安全",B:"能源安全",C:"产业供应链安全",D:"经济安全"},a:"D"},
+  {id:57,t:"single",q:"（ ）是直接创造物质财富的领域，是一个复杂的大系统。",o:{A:"生产领域",B:"流通领域",C:"粮食领域",D:"能源领域"},a:"A"},
+  {id:58,t:"single",q:"坚持（ ）是维护经济发展道路安全的关键，也是维护国家安全的重要基石。",o:{A:"党的领导",B:"改革开放",C:"经济安全",D:"军事安全"},a:"A"},
+  {id:59,t:"single",q:"西方经济（ ）和霸凌行径严重威胁我国的经济主权安全。",o:{A:"霸权主义",B:"多边主义",C:"多极化",D:"全球化"},a:"A"},
+  {id:60,t:"single",q:"以下不属于国际金融危机的有（ ）。",o:{A:"生态危机",B:"货币危机",C:"信用危机",D:"股市危机"},a:"A"},
+  {id:61,t:"single",q:"2008年的雷曼兄弟公司破产事件属于（ ）危机。",o:{A:"国际金融",B:"粮食",C:"产业链",D:"供应链"},a:"A"},
+  {id:62,t:"single",q:"毫不动摇巩固和发展公有制经济，毫不动摇鼓励、（ ）引导非公有制经济发展。",o:{A:"支持",B:"完善",C:"指导",D:"领导"},a:"A"},
+  {id:63,t:"single",q:"贯彻（ ），构建新发展格局，推动高质量发展。",o:{A:"新发展理念",B:"高质量发展",C:"新质生产力",D:"五位一体"},a:"A"},
+  {id:64,t:"single",q:"（ ）年召开的中央金融工作会议提出了加快建设金融强国的宏伟目标。",o:{A:"2023",B:"2024",C:"2025",D:"2026"},a:"A"},
+  {id:65,t:"single",q:"耕地是粮食生产的命根子，要严守（ ）亿亩耕地红线。",o:{A:"18",B:"19",C:"20",D:"17"},a:"A"},
+  {id:66,t:"single",q:"强国必须强军，军强才能国安，维护（ ），军事力量是保底手段，是硬核支撑。",o:{A:"国家安全",B:"人民安全",C:"军事安全",D:"文化安全"},a:"A"},
+  {id:67,t:"single",q:"加强实现高水平科技自立自强，是（ ）的关键，是推动高质量发展的必由之路。",o:{A:"文化强军",B:"中国式现代化",C:"社会稳定",D:"人才强军"},a:"B"},
+  {id:68,t:"single",q:"建设科技强国，不断维护和塑造我国科技安全，归根到底要靠高水平（ ）。",o:{A:"党的领导",B:"改革开放",C:"科技创新人才",D:"先进装备"},a:"C"},
+  {id:69,t:"single",q:"防范化解（ ）是社会治理的重点任务。",o:{A:"政治风险",B:"经济危机",C:"文化冲突",D:"社会治安风险"},a:"D"},
+  {id:70,t:"single",q:"（ ）从来没有像今天这样深刻影响国家安全和军事战略竞争格局。",o:{A:"科技",B:"文化",C:"人才",D:"军队"},a:"A"},
+  {id:71,t:"single",q:"要深入贯彻（ ），坚持党对人民军队的绝对领导。",o:{A:"习近平文化思想",B:"习近平强军思想",C:"习近平经济思想",D:"习近平法治思想"},a:"B"},
+  {id:72,t:"single",q:"要高度重视基层治理，尊重官兵主体地位和（ ）。",o:{A:"人才优势",B:"奋斗精神",C:"首创精神",D:"斗争精神"},a:"C"},
+  {id:73,t:"single",q:"中国要强盛要复兴，就一定要坚持（ ），实现科学技术自主发展。",o:{A:"自立自强",B:"独立自主",C:"依法治国",D:"新型举国体制"},a:"A"},
+  {id:74,t:"single",q:"必须以习近平（ ）为指引，着力加强党对宣传思想文化工作的领导。",o:{A:"文化思想",B:"外交思想",C:"经济思想",D:"生态文明思想"},a:"A"},
+  {id:75,t:"single",q:"着力推动公共安全治理模式从事后处置向事前（ ）转型。",o:{A:"管理",B:"预防",C:"解决",D:"保障"},a:"B"},
+  {id:76,t:"single",q:"2023年2月，中国发布的《全球安全倡议概念文件》，进一步明确了（ ）的核心理念与原则。",o:{A:"全球安全倡议",B:"全球发展倡议",C:"全球治理倡议",D:"全球和平倡议"},a:"A"},
+  {id:77,t:"single",q:"（ ）问题是双向的，联动的，牺牲别国安全谋求自身绝对安全是不可取的。",o:{A:"发展",B:"安全",C:"经济",D:"军事"},a:"B"},
+  {id:78,t:"single",q:"在国际安全领域，中国始终坚持以（ ）方式解决国际争端。",o:{A:"冲突",B:"暴力",C:"和平",D:"战争"},a:"C"},
+  {id:79,t:"single",q:"（ ）是生产力发展的客观要求，是不可逆转的时代潮流。",o:{A:"世界多极化",B:"文化多样化",C:"社会信息化",D:"经济全球化"},a:"D"},
+  {id:80,t:"single",q:"必须把抢占全球（ ）版图优势地位摆在国家发展全局的突出战略位置。",o:{A:"创新",B:"治理",C:"发展",D:"稳定"},a:"A"},
+  {id:81,t:"single",q:"当前国际安全面临多种挑战，要坚持以习近平（ ）思想为指导。",o:{A:"文化",B:"法治",C:"外交",D:"经济"},a:"C"},
+  {id:82,t:"single",q:"影响我国国土安全，也是祖国统一的最大障碍和民族复兴的严重隐患的是（ ）。",o:{A:"外部势力干涉",B:"领土领海争端",C:"“台独”分裂",D:"边境安全冲突"},a:"C"},
+  {id:83,t:"single",q:"中国二氧化碳排放力争于（ ）年前达到峰值，努力争取（ ）年前实现碳中和。",o:{A:"2025，2050",B:"2030，2050",C:"2035，2060",D:"2030，2060"},a:"D"},
+  {id:84,t:"single",q:"针对我国资源基本国情，下列说法正确的是（ ）。",o:{A:"贫煤、富油、少气",B:"富煤、贫油、少气",C:"富煤、富油、富气",D:"少煤、贫油、富气"},a:"B"},
+  {id:85,t:"single",q:"维护国家网络安全，必须坚持（ ）的原则。",o:{A:"网络安全为人民、网络安全靠人民",B:"技术先进、产业发达",C:"攻防兼备、防范为主",D:"安全可控、开放创新"},a:"A"},
+  {id:86,t:"single",q:"习近平主席在荷兰海牙第三届核安全峰会上提出，要坚持（ ）的核安全观。",o:{A:"共同、综合、合作",B:"合作、共赢、开放",C:"理性、协调、并进",D:"全面、系统、科学"},a:"C"},
+  {id:87,t:"single",q:"下列不属于“新的重要疆域”的是（ ）。",o:{A:"深海",B:"文化",C:"太空",D:"极地"},a:"B"},
+  {id:88,t:"single",q:"下列不属于我国深海探测开发事业取得的成绩的是（ ）。",o:{A:"“蛟龙”号",B:"“深海勇士”号",C:"“奋斗者”号",D:"“嫦娥”号"},a:"D"},
+  {id:89,t:"single",q:"我国建成的第一个南极科考站是（ ）。",o:{A:"中山站",B:"长城站",C:"昆仑站",D:"泰山站"},a:"B"},
+  {id:90,t:"single",q:"关于增强国家安全意识、坚持国家利益至上的相关表述错误的是（ ）。",o:{A:"认真学习马克思主义国家学说",B:"认清我国安全面临的风险挑战",C:"坚持和贯彻以人民为中心的发展思想",D:"个人利益高于国家利益"},a:"D"},
+  {id:91,t:"single",q:"（ ）是中华民族的重要精神特质，是贯穿于中华民族发展史的鲜明精神主线。",o:{A:"斗争精神",B:"忧患意识",C:"开拓精神",D:"创新精神"},a:"B"},
+  {id:92,t:"multi",q:"新时代我国生态文明建设的成就举世瞩目，实现了四个重大转变，具体包括（ ）。",o:{A:"由重点整治到系统治理",B:"由被动应对到主动作为",C:"由全球环境治理参与者到引领者",D:"由实践探索到科学理论指导"},a:"ABCD"},
+  {id:93,t:"multi",q:"中国提出的理性、协调、并进的核安全观中，“并进”旨在阐明四个方面的并重，下列属于这四个方面的是（ ）。",o:{A:"发展和安全并重",B:"权利和义务并重",C:"自主和协作并重",D:"治标和治本并重"},a:"ABCD"},
+  {id:94,t:"multi",q:"新时代大学生践行总体国家安全观，必须着力增强忧患意识、发扬斗争精神，下列选项中正确的有（ ）。",o:{A:"明大势，认清中国特色社会主义进入新时代的历史方位",B:"明大理，深学细悟习近平新时代中国特色社会主义思想",C:"树牢底线思维，形成对风险的预判、防范和化解",D:"安于现状、回避矛盾"},a:"ABC"},
+  {id:95,t:"multi",q:"总体国家安全观坚持以人民安全为宗旨，表明我国的国家安全归根到底是（ ）。",o:{A:"维护少数特殊群体的特权与利益",B:"维护人民群众的安全",C:"保障人民根本利益",D:"满足部分公民的个人诉求"},a:"BC"},
+  {id:96,t:"multi",q:"为加强国家安全教育，形成维护和塑造国家安全的合力，应当做到（ ）。",o:{A:"维护国家安全是全民责任",B:"履行维护国家安全的法定义务",C:"积极参与国家安全教育",D:"国家安全仅由国家机关负责"},a:"ABC"},
+  {id:97,t:"multi",q:"发现间谍行为或可疑情况，可以向国家安全机关举报，举报方式包括（ ）。",o:{A:"在国家安全机关网站提交举报信息",B:"在朋友圈发布曝光信息",C:"拨打12339举报电话",D:"通过12339网络平台举报"},a:"ACD"},
+  {id:98,t:"multi",q:"《中华人民共和国国家安全法》的制定，其意义在于（ ）。",o:{A:"以法律的形式确立了总体国家安全观的指导地位",B:"明确了维护国家安全的任务、职责和制度",C:"明确了公民、组织的权利和义务",D:"为推进国家安全体系和能力现代化奠定了坚实法律基础"},a:"ABCD"},
+  {id:99,t:"multi",q:"推动发展、实现发展利益的根本保证是（ ）。",o:{A:"维护国家主权",B:"维护国家发展",C:"维护国家安全",D:"维护国家利益"},a:"AC"},
+  {id:100,t:"multi",q:"总体国家安全观坚持（ ）可持续安全，指导推动我国国家安全体系和能力现代化不断发展。",o:{A:"动态的",B:"发展的",C:"综合的",D:"开放的"},a:"ABCD"},
+  {id:101,t:"multi",q:"某网络科技公司有意将我国军事禁区周边地理信息精度提高并上传至境外服务器，这种行为严重威胁我国的（ ）。",o:{A:"网络安全",B:"军事安全",C:"经济安全",D:"文化安全"},a:"AB"},
+  {id:102,t:"multi",q:"新时代党领导国家安全事业取得的一系列开创性成就包括（ ）。",o:{A:"进一步健全共建共治共享的社会治理制度",B:"健全和完善国家安全法治体系",C:"设立中央国家安全委员会",D:"把安全发展贯穿国家发展各领域全过程"},a:"ABCD"},
+  {id:103,t:"multi",q:"中国特色国家安全道路的科学内涵（五大要素）包括（ ）。",o:{A:"以人民安全为宗旨",B:"以政治安全为根本",C:"以经济安全为基础",D:"以促进国际安全为依托"},a:"ABCD"},
+  {id:104,t:"multi",q:"根据党的二十大的战略部署，推进国家安全体系和能力现代化的重点任务主要有（ ）。",o:{A:"健全集中统一、高效权威的国家安全体系",B:"增强维护国家安全能力",C:"提高公共安全治理水平",D:"完善社会治理体系"},a:"ABCD"},
+  {id:105,t:"multi",q:"坚持稳中求进工作总基调，“稳”的重点包括（ ）。",o:{A:"稳住经济运行",B:"确保增长、就业、物价不出现大的波动",C:"确保金融不出现区域性系统性风险",D:"稳住经济基本盘"},a:"ABCD"},
+  {id:106,t:"multi",q:"坚持底线思维和极限思维，要求我们做到（ ）。",o:{A:"不回避矛盾，不掩盖问题",B:"凡事从坏处准备，努力争取最好的结果",C:"有备无患、遇事不慌",D:"对可能出现的最坏情形有充分的预见和准备"},a:"ABCD"},
+  {id:107,t:"multi",q:"以新安全格局保障新发展格局的重点任务主要包括（ ）。",o:{A:"保障实现高水平科技自立自强",B:"保障国内经济循环畅通无阻",C:"保障国内国际双循环相互促进",D:"保障主导全球产业分工体系"},a:"ABC"},
+  {id:108,t:"multi",q:"人民是国家安全事务的（ ），是维护国家安全的力量源泉和坚强后盾。",o:{A:"参与者",B:"动员者",C:"管理者",D:"行动者"},a:"AD"},
+  {id:109,t:"multi",q:"着力解决人民群众反映强烈的安全问题，需要做到（ ）。",o:{A:"抓好安全生产工作",B:"提升公共卫生防控救治能力",C:"提升食品药品安全保障水平",D:"健全社会保障体系"},a:"ABCD"},
+  {id:110,t:"multi",q:"调动人民群众维护国家安全的积极性，需要（ ）。",o:{A:"筑牢国家安全人民防线",B:"加强国家安全宣传教育学习",C:"限制人民群众参与维护公共安全的途径",D:"限制人民群众对国家安全事务的知情权"},a:"AB"},
+  {id:111,t:"multi",q:"关于发挥党总揽全局、协调各方领导核心作用的说法正确的有（ ）。",o:{A:"党的全面领导贯穿我国政治运行和发展的各领域各环节",B:"党的领导核心作用是发展全过程人民民主的首要条件",C:"要依托人民代表大会制度推动党的路线方针政策全面贯彻落实",D:"可通过法定程序将党的主张转化为国家意志"},a:"ABCD"},
+  {id:112,t:"multi",q:"坚定道路自信、理论自信是防范化解政治风险的重要支撑，下列表述正确的有（ ）。",o:{A:"中国特色社会主义道路是创造人民美好生活的康庄大道",B:"当代中国的伟大社会变革不是简单延续历史文化母版",C:"坚定道路自信必须既不走封闭僵化的老路也不走改旗易帜的邪路",D:"中国共产党为什么能，归根到底是马克思主义行"},a:"ABCD"},
+  {id:113,t:"multi",q:"坚定制度自信、文化自信，下列表述正确的有（ ）。",o:{A:"中国特色社会主义制度和国家治理体系深得人民拥护",B:"维护政治安全应弱化制度建设",C:"文化自信是更基础、更广泛、更深厚的自信",D:"坚定文化自信要推进马克思主义同中华优秀传统文化相结合"},a:"ACD"},
+  {id:114,t:"multi",q:"经济安全主要包括（ ）和重点经济领域安全等内容。",o:{A:"基本经济制度安全",B:"经济主权安全",C:"经济秩序安全",D:"经济发展道路安全"},a:"ABCD"},
+  {id:115,t:"multi",q:"（ ）和（ ）都是社会主义市场经济的重要组成部分。",o:{A:"公有制经济",B:"非公有制经济",C:"资本主义经济",D:"民营经济"},a:"AB"},
+  {id:116,t:"multi",q:"否定我国基本经济制度的错误观点包括（ ）。",o:{A:"资本主义社会",B:"国家资本主义",C:"新官僚资本主义",D:"封建主义"},a:"ABC"},
+  {id:117,t:"multi",q:"中国共产党领导实现了社会治理方式的历史性转变，创造了并不断续写着（ ）和（ ）的两大奇迹。",o:{A:"经济快速发展",B:"社会长期稳定",C:"文化繁荣昌盛",D:"生态环境改善"},a:"AB"},
+  {id:118,t:"multi",q:"哲学社会科学发展水平反映了一个民族的（ ），体现了一个国家的综合国力。",o:{A:"思维能力",B:"精神品格",C:"文明素质",D:"经济实力"},a:"ABC"},
+  {id:119,t:"multi",q:"建设（ ）的社会治理共同体。",o:{A:"人人有责",B:"人人尽责",C:"人人享有",D:"人人维护"},a:"ABC"},
+  {id:120,t:"multi",q:"经济全球化促进了（ ），推动了世界经济快速发展。",o:{A:"贸易繁荣",B:"投资便利",C:"人员流动",D:"技术发展"},a:"ABCD"},
+  {id:121,t:"multi",q:"各国应认识到国际安全机制构建和完善的目的是实现（ ）。",o:{A:"共同安全",B:"综合安全",C:"合作安全",D:"可持续安全"},a:"ABCD"}
+];
+
+// ========== DOM REFS ==========
+var $ = function(id){ return document.getElementById(id); };
+var tagEl = $('qTag'), numEl = $('qNum'), txtEl = $('qText'), optsEl = $('opts');
+var resEl = $('resBanner'), btnSubmit = $('btnSubmit'), btnSkip = $('btnSkip');
+var btnShow = $('btnShow'), btnNext = $('btnNext');
+var accEl = $('acc'), doneEl = $('done'), remainEl = $('remain'), progEl = $('prog');
+var wcBadge = $('wcBadge'), wrongList = $('wrongList');
+var stOk = $('stOk'), stBad = $('stBad'), stSkip = $('stSkip'), stRate = $('stRate');
+
+// ========== STATE ==========
+var STORAGE_KEY = 'gs_quiz_v2';
+var pool = [], idx = 0, answered = false, selected = {};
+var done = {}, wrongSet = {}, skipped = 0;
+var settings = {range:'all',random:true,removeCorrect:true,limit:0};
+
+function loadState(){
+  try{
+    var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(s){ done=s.done||{}; wrongSet=s.wrongSet||{}; skipped=s.skipped||0; if(s.settings) settings=s.settings; }
+  }catch(e){}
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({done:done,wrongSet:wrongSet,skipped:skipped,settings:settings}));
+}
+function getStats(){
+  var c=0,w=0;
+  for(var k in done){ if(done[k]==='ok')c++; else if(done[k]==='bad')w++; }
+  return {ok:c,bad:w,skipped:skipped,total:c+w,rate:c+w>0?Math.round(c/(c+w)*100):0};
+}
+
+// ========== POOL ==========
+function buildPool(){
+  var ids;
+  if(settings.range==='single') ids=Q.filter(function(q){return q.t==='single'}).map(function(q){return q.id;});
+  else if(settings.range==='multi') ids=Q.filter(function(q){return q.t==='multi'}).map(function(q){return q.id;});
+  else if(settings.range==='wrong'){ ids=[]; for(var k in wrongSet) ids.push(parseInt(k)); }
+  else ids=Q.map(function(q){return q.id;});
+
+  if(settings.removeCorrect){
+    ids=ids.filter(function(id){return done[id]!=='ok';});
+  }
+
+  if(settings.random){
+    for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=ids[i];ids[i]=ids[j];ids[j]=t;}
+  }
+
+  if(settings.limit>0) ids=ids.slice(0,settings.limit);
+
+  pool=ids; idx=0;
+}
+
+function curQ(){
+  if(idx>=pool.length) return null;
+  return Q.filter(function(q){return q.id===pool[idx];})[0];
+}
+
+// ========== RENDER ==========
+function render(){
+  var q=curQ();
+  if(!q){
+    $('qCard').innerHTML='<div class="empty"><div class="emj">🏆</div>本轮题目已全部完成！<br><span style="font-size:12px">去看看错题回顾吧</span></div>';
+    $('btnRow').style.display='none';
+    btnShow.style.display='none'; btnNext.style.display='none';
+    updateUI(); return;
+  }
+
+  answered=false; selected={};
+  $('btnRow').style.display=''; btnShow.style.display=''; btnNext.style.display='';
+  btnSubmit.textContent='✓ 提交答案'; btnSubmit.disabled=false;
+
+  tagEl.textContent=q.t==='single'?'单选题':'多选题';
+  tagEl.className='q-tag '+(q.t==='single'?'sin':'mul');
+  numEl.textContent='第 '+(idx+1)+'/'+pool.length+' 题 · 编号 #'+q.id;
+  txtEl.textContent=q.q;
+
+  optsEl.innerHTML='';
+  var letters=Object.keys(q.o);
+  for(var i=0;i<letters.length;i++){
+    var lt=letters[i], tx=q.o[lt];
+    var div=document.createElement('div');
+    div.className='opt';
+    div.innerHTML='<span class="let">'+lt+'</span><span class="txt">'+tx+'</span><span class="icn"></span>';
+    div.setAttribute('data-letter',lt);
+    div.onclick=function(e){ var el=e.currentTarget; toggleOpt(el.getAttribute('data-letter'),el); };
+    optsEl.appendChild(div);
+  }
+
+  resEl.className='res'; resEl.textContent='';
+  updateUI();
+}
+
+function toggleOpt(letter,el){
+  if(answered) return;
+  var q=curQ(); if(!q) return;
+
+  if(q.t==='single'){
+    selected={};
+    var all=optsEl.querySelectorAll('.opt');
+    for(var i=0;i<all.length;i++) all[i].classList.remove('sel');
+    selected[letter]=true;
+    el.classList.add('sel');
+  }else{
+    if(selected[letter]){ delete selected[letter]; el.classList.remove('sel'); }
+    else{ selected[letter]=true; el.classList.add('sel'); }
+  }
+}
+
+// ========== ACTIONS ==========
+function submit(){
+  var q=curQ(); if(!q||answered) return;
+  var keys=Object.keys(selected);
+  if(keys.length===0) return;
+
+  answered=true;
+  var picked=keys.sort().join('');
+  var ok=(picked===q.a);
+  done[q.id]=ok?'ok':'bad';
+  if(ok) delete wrongSet[q.id]; else wrongSet[q.id]=true;
+  saveState();
+
+  // Highlight
+  var all=optsEl.querySelectorAll('.opt');
+  for(var i=0;i<all.length;i++){
+    var el=all[i], lt=el.getAttribute('data-letter');
+    if(q.a.indexOf(lt)>=0){ el.classList.add('ok'); el.querySelector('.icn').textContent='✓'; }
+    if(selected[lt] && q.a.indexOf(lt)<0){ el.classList.add('bad'); el.querySelector('.icn').textContent='✗'; }
+  }
+
+  resEl.className='res show '+(ok?'ok':'bad');
+  if(ok) resEl.textContent='✅ 回答正确！';
+  else {
+    var ansText = q.a.split('').map(function(l){return l+'.'+q.o[l];}).join('  ');
+    resEl.textContent='❌ 错误！正确答案：'+q.a+' ('+ansText+')';
+  }
+  btnSubmit.textContent='已提交'; btnSubmit.disabled=true;
+  updateUI();
+}
+
+function showAns(){
+  var q=curQ(); if(!q) return;
+  answered=true; done[q.id]='skip'; skipped++; saveState();
+  var all=optsEl.querySelectorAll('.opt');
+  for(var i=0;i<all.length;i++){
+    var el=all[i], lt=el.getAttribute('data-letter');
+    if(q.a.indexOf(lt)>=0){ el.classList.add('ok'); el.querySelector('.icn').textContent='✓'; }
+  }
+  resEl.className='res show ok';
+  resEl.textContent='💡 正确答案：'+q.a;
+  btnSubmit.disabled=true;
+  updateUI();
+}
+
+function skip(){
+  var q=curQ();
+  if(q&&!answered){ done[q.id]='skip'; skipped++; saveState(); }
+  nextQ();
+}
+
+function nextQ(){
+  idx++;
+  if(idx>=pool.length){ buildPool(); if(pool.length===0){ pool=Q.map(function(q){return q.id;}); idx=0; } }
+  render();
+}
+
+// ========== UI ==========
+function updateUI(){
+  var s=getStats();
+  accEl.textContent=s.rate+'%';
+  doneEl.textContent=s.total;
+  remainEl.textContent=Math.max(0,pool.length-idx-(answered?1:0));
+  var pct=pool.length>0?Math.min(100,Math.round((idx+(answered?1:0))/pool.length*100)):0;
+  progEl.style.width=pct+'%';
+
+  var wc=0; for(var k in wrongSet) wc++;
+  wcBadge.textContent=wc;
+  wcBadge.style.display=wc>0?'inline':'none';
+
+  stOk.textContent=s.ok; stBad.textContent=s.bad;
+  stSkip.textContent=s.skipped; stRate.textContent=s.rate+'%';
+}
+
+function renderWrong(){
+  var wc=0, html='';
+  for(var k in wrongSet){
+    wc++;
+    var q=Q.filter(function(q){return q.id===parseInt(k);})[0];
+    if(!q) continue;
+    var ansText = q.a.split('').map(function(l){return l+'.'+q.o[l];}).join('；');
+    html+='<div class="wrong-item"><div class="qt">#'+q.id+' ['+(q.t==='single'?'单选':'多选')+'] '+q.q+'</div><div class="ac">✅ 正确答案：'+q.a+'（'+ansText+'）</div></div>';
+  }
+  wrongList.innerHTML=html||'<div class="empty"><div class="emj">🎉</div>暂无错题，继续加油！</div>';
+  wcBadge.textContent=wc;
+  wcBadge.style.display=wc>0?'inline':'none';
+}
+
+function clearWrong(){
+  wrongSet={}; saveState(); renderWrong(); updateUI();
+}
+
+// ========== SETTINGS ==========
+function applySettings(){
+  settings.range=$('setRange').value;
+  settings.limit=parseInt($('setLimit').value)||0;
+  saveState(); buildPool(); render(); updateUI();
+}
+function toggleSet(key){
+  if(key==='random'){ settings.random=!settings.random; $('tglRandom').classList.toggle('on',settings.random); }
+  if(key==='remove'){ settings.removeCorrect=!settings.removeCorrect; $('tglRemove').classList.toggle('on',settings.removeCorrect); }
+  saveState(); buildPool(); render(); updateUI();
+}
+function syncSettingsUI(){
+  $('setRange').value=settings.range;
+  $('setLimit').value=settings.limit;
+  $('tglRandom').classList.toggle('on',settings.random);
+  $('tglRemove').classList.toggle('on',settings.removeCorrect);
+}
+
+// ========== TABS ==========
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  if(name==='quiz') $('tabQuiz').classList.add('active');
+  if(name==='review') $('tabReview').classList.add('active');
+  if(name==='settings') $('tabSettings').classList.add('active');
+
+  $('pageQuiz').style.display=name==='quiz'?'':'none';
+  $('pageReview').style.display=name==='review'?'':'none';
+  $('pageSettings').style.display=name==='settings'?'':'none';
+
+  if(name==='review') renderWrong();
+  if(name==='settings'){ syncSettingsUI(); updateUI(); }
+}
+
+// ========== EVENTS ==========
+$('tabQuiz').addEventListener('click',function(){switchTab('quiz');});
+$('tabReview').addEventListener('click',function(){switchTab('review');});
+$('tabSettings').addEventListener('click',function(){switchTab('settings');});
+
+$('tglRandom').addEventListener('click',function(){toggleSet('random');});
+$('tglRemove').addEventListener('click',function(){toggleSet('remove');});
+$('setRange').addEventListener('change',applySettings);
+$('setLimit').addEventListener('change',applySettings);
+$('btnClearWrong').addEventListener('click',clearWrong);
+
+btnSubmit.addEventListener('click',submit);
+btnSkip.addEventListener('click',skip);
+btnShow.addEventListener('click',showAns);
+btnNext.addEventListener('click',nextQ);
+
+// Keyboard
+document.addEventListener('keydown',function(e){
+  if(answered) return;
+  var q=curQ(); if(!q) return;
+  var key=e.key.toUpperCase();
+  if(q.o[key]){
+    var all=optsEl.querySelectorAll('.opt');
+    var letters=Object.keys(q.o);
+    var ii=letters.indexOf(key);
+    if(ii>=0&&ii<all.length) toggleOpt(key,all[ii]);
+  }
+  if(e.key==='Enter'){ e.preventDefault(); submit(); }
+  if(e.key==='ArrowRight') nextQ();
+});
+
+// ========== INIT ==========
+loadState();
+syncSettingsUI();
+buildPool();
+render();
+updateUI();
+})();
+</script>
+</body>
+</html>
